@@ -36,6 +36,8 @@ DB_QUERY_FIO = """Select FIO,e_addr from stud X1 INNER JOIN
                 AND X2.N_Auditorii = X3.N_Auditorii)
                 where X3.FIO_prep = '{}'"""
 DB_QUERY_DEL_REST = """delete from rest"""
+DB_QUERY_FIO_PREP = """Select e_addr from prepodavatel
+                    where FIO = '{}'"""
 
 SET_TEXT_TE = """{} -  {}  -  {}  -  {}  -  {}  -  {}  ->>  {}  -  {}  -  {}  -  {}"""
 
@@ -203,10 +205,8 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.textEdit_5.clear()
         if self.page != 0:
             self.page = self.page - 5
-        try:
-            self.viv(self.page)
-        except:
-            print('fail')
+
+        self.viv(self.page)
 
     def btn2_clk(self):
         self.textEdit.clear()
@@ -216,12 +216,10 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.textEdit_5.clear()
         if self.page / 5 < len(self.query) // 5:
             self.page = self.page + 5
-        try:
-            self.viv(self.page)
-        except:
-            print('fail')
+        self.viv(self.page)
 
     def btn3_clk(self):
+        self.msg = ''
 
         for i in range(0, 5):
             if self.log[i]:
@@ -245,6 +243,24 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
                                                      self.query[self.page + i][8],
                                                      self.query[self.page + i][9]))
 
+                self.msg = SET_TEXT_TE.format(self.query[self.page + i][0],
+                                                    self.query[self.page + i][1],
+                                                    self.query[self.page + i][2],
+                                                    self.query[self.page + i][3],
+                                                    self.query[self.page + i][4],
+                                                    self.query[self.page + i][5],
+                                                    self.query[self.page + i][6],
+                                                    self.query[self.page + i][7],
+                                                    self.query[self.page + i][8],
+                                                    self.query[self.page + i][9])
+                self.query_fio = query_in(DB_QUERY_FIO_PREP.format(self.query[self.page + i][0]))
+
+                subject = "Перенос пары"
+                body_text = "совершен перенос пары {}.".format(self.msg)
+                body_text2 = "Ув. {},".format(self.query[self.page + i][0])
+                txt = body_text2 + body_text
+                send_email(subject, txt, self.query_fio[0][0])
+
         self.checkBox.setCheckState(False)
         self.checkBox_2.setCheckState(False)
         self.checkBox_3.setCheckState(False)
@@ -260,6 +276,7 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.viv(0)
 
     def btn5_clk(self):
+        self.query_fio2 = []
         for i in range(0, 5):
             if self.log[i]:
 
@@ -273,6 +290,23 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
                                                      self.query[self.page + i][7],
                                                      self.query[self.page + i][8],
                                                      self.query[self.page + i][9]))
+                self.msg = SET_TEXT_TE.format(self.query[self.page + i][0],
+                                              self.query[self.page + i][1],
+                                              self.query[self.page + i][2],
+                                              self.query[self.page + i][3],
+                                              self.query[self.page + i][4],
+                                              self.query[self.page + i][5],
+                                              self.query[self.page + i][6],
+                                              self.query[self.page + i][7],
+                                              self.query[self.page + i][8],
+                                              self.query[self.page + i][9])
+
+                self.query_fio2 = query_in(DB_QUERY_FIO_PREP.format(self.query[self.page + i][0]))
+                subject = "Перенос пары"
+                body_text = "отказано в переносе пары {}.".format(self.msg)
+                body_text2 = "Ув. {},".format(self.query[self.page + i][0])
+                txt = body_text2 + body_text
+                send_email(subject, txt, self.query_fio2[0][0])
         self.checkBox.setCheckState(False)
         self.checkBox_2.setCheckState(False)
         self.checkBox_3.setCheckState(False)
@@ -316,6 +350,7 @@ def main():
     window = ExampleApp()
     window.show()
     app.exec_()
+
 
 if __name__ == '__main__':
     main()
